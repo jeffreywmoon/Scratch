@@ -31,7 +31,7 @@ class LoginModel{
             return false;
         
         // if the user's hashed password doesn't match db hashed pw    
-        }elseif(!self::checkPasswords($user['password_hash'], UserModel::password($password, $user['salt']))){
+        }elseif(!password_verify($password, $user['password_hash'])){
             Session::set('login_feedback', "Username/Password mismatch");
             return false;
         
@@ -51,12 +51,5 @@ class LoginModel{
      */
     public static function logout(){
         Session::destroy();
-    }
-    
-    /**
-     * returns true if password hashes are equal
-     */
-    private static function checkPasswords($pwhash1, $pwhash2){
-        return ($pwhash1==$pwhash2) ? true : false;
     }
 }

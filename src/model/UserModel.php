@@ -12,7 +12,7 @@ class UserModel{
      */
     public static function getUser($email){
         $db = DatabaseFactory::getFactory()->getConnection();
-        $st = $db->prepare('SELECT user_id, password_hash, salt FROM auth WHERE email=:email LIMIT 1');
+        $st = $db->prepare('SELECT user_id, password_hash FROM auth WHERE email=:email LIMIT 1');
         $st->execute(array(':email'=>$email));
          
         return $st->fetch(PDO::FETCH_ASSOC);
@@ -34,16 +34,15 @@ class UserModel{
      */
     public static function addNewUser($email, $password, $first_name, $last_name){
         $db = DatabaseFactory::getFactory()->getConnection();
-        $st = $db->prepare('INSERT INTO auth (email, password_hash, salt) VALUES (:email,:password_hash,:salt);' .
+        $st = $db->prepare('INSERT INTO auth (email, password_hash) VALUES (:email,:password_hash);' .
             'INSERT INTO user (user_id, first_name, last_name, email, joined) VALUES 
             (LAST_INSERT_ID(), :first_name, :last_name, :email, :joined);');
         // generate salt, hash password
         $salt = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
-        $password_hash = self::password($password, $salt);
+        $password_hash = password_hash($password, PASSWORD_DEFAULT);
         $st->execute(array(
             ':email' => $email,
             ':password_hash' => $password_hash,
-            ':salt' => $salt,
             ':first_name' => $first_name,
             ':last_name' => $last_name,  
             ':email' => $email,
